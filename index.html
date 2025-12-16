@@ -1,364 +1,1092 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Telegram Calls</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Telegram Calls Pro</title>
+    
+    <!-- Стили -->
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="components.css">
+    
+    <!-- Иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="assets/icons/icon-192.png">
+    
+    <!-- Мета-теги -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a0a0a">
+    <meta name="description" content="Продвинутые аудио- и видеозвонки с чатами и групповыми конференциями">
 </head>
 <body>
-    <!-- Главный экран -->
+    <!-- Экран загрузки -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="rocket-loader">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h2>Telegram Calls Pro</h2>
+            <p class="loading-text">Загрузка...</p>
+        </div>
+    </div>
+
+    <!-- Боковое меню -->
+    <div id="sideMenu" class="side-menu">
+        <div class="menu-header">
+            <div class="user-profile">
+                <img src="https://i.pravatar.cc/150?img=3" alt="Профиль" class="profile-avatar">
+                <div class="profile-info">
+                    <h3>Алексей</h3>
+                    <p>+7 (999) 123-45-67</p>
+                </div>
+            </div>
+            <button class="close-menu" onclick="closeSideMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="menu-items">
+            <a href="#" class="menu-item active" onclick="showMainScreen()">
+                <i class="fas fa-comments"></i>
+                <span>Чаты</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showContactsScreen()">
+                <i class="fas fa-address-book"></i>
+                <span>Контакты</span>
+                <span class="badge">24</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showCallHistory()">
+                <i class="fas fa-history"></i>
+                <span>История звонков</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showGroupsScreen()">
+                <i class="fas fa-users"></i>
+                <span>Группы</span>
+                <span class="badge">3</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showSettingsScreen()">
+                <i class="fas fa-cog"></i>
+                <span>Настройки</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showPremiumScreen()">
+                <i class="fas fa-crown"></i>
+                <span>Premium</span>
+                <span class="premium-badge">PRO</span>
+            </a>
+        </div>
+        
+        <div class="menu-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Выйти</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Главный экран (Чаты) -->
     <div id="mainScreen" class="screen active">
         <!-- Хедер -->
         <header class="header">
-            <div class="header-left">
-                <h1 class="app-title">Telegram</h1>
-                <span class="beta-badge">Calls</span>
+            <button class="icon-btn" onclick="toggleSideMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="header-title">
+                <h1>Чаты</h1>
+                <div class="online-status">
+                    <span class="status-dot online"></span>
+                    <span class="status-text">В сети</span>
+                </div>
             </div>
-            <div class="header-right">
-                <button class="icon-btn" onclick="toggleTheme()">
-                    <i class="fas fa-moon"></i>
+            
+            <div class="header-actions">
+                <button class="icon-btn" onclick="startNewChat()" title="Новый чат">
+                    <i class="fas fa-edit"></i>
                 </button>
-                <button class="icon-btn" onclick="showSearch()">
+                <button class="icon-btn" onclick="showSearch()" title="Поиск">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
         </header>
 
         <!-- Поиск -->
-        <div id="searchBar" class="search-bar hidden">
-            <input type="text" placeholder="Поиск чатов и звонков..." class="search-input">
-            <button class="icon-btn close-search" onclick="hideSearch()">
-                <i class="fas fa-times"></i>
-            </button>
+        <div id="searchBar" class="search-bar">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Поиск чатов и сообщений...">
+                <button class="icon-btn" onclick="hideSearch()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Быстрые действия -->
         <div class="quick-actions">
-            <button class="quick-action" onclick="openCallHistory()">
-                <div class="quick-icon">
+            <button class="quick-action" onclick="startNewCall('audio')">
+                <div class="action-icon audio">
                     <i class="fas fa-phone"></i>
                 </div>
-                <span>Звонки</span>
+                <span>Аудиозвонок</span>
             </button>
-            <button class="quick-action" onclick="openChats()">
-                <div class="quick-icon">
-                    <i class="fas fa-comments"></i>
+            <button class="quick-action" onclick="startNewCall('video')">
+                <div class="action-icon video">
+                    <i class="fas fa-video"></i>
                 </div>
-                <span>Чаты</span>
+                <span>Видеозвонок</span>
             </button>
-            <button class="quick-action" onclick="openSettings()">
-                <div class="quick-icon">
-                    <i class="fas fa-cog"></i>
+            <button class="quick-action" onclick="createGroupCall()">
+                <div class="action-icon group">
+                    <i class="fas fa-users"></i>
                 </div>
-                <span>Настройки</span>
+                <span>Групповой</span>
+            </button>
+            <button class="quick-action" onclick="showContactsScreen()">
+                <div class="action-icon contact">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <span>Контакты</span>
             </button>
         </div>
 
         <!-- Список чатов -->
-        <div class="chats-list">
-            <div class="chat-item" onclick="startCall('audio', this)">
-                <div class="chat-avatar">
-                    <img src="https://i.pravatar.cc/150?img=1" alt="Alex">
-                    <span class="online-dot"></span>
-                </div>
-                <div class="chat-info">
-                    <div class="chat-header">
-                        <h3 class="chat-name">Alex Johnson</h3>
-                        <span class="chat-time">14:30</span>
+        <div class="chats-container">
+            <div class="chats-list" id="chatsList">
+                <!-- Чат 1 -->
+                <div class="chat-item" onclick="openChat(1)">
+                    <div class="chat-avatar">
+                        <img src="https://i.pravatar.cc/150?img=1" alt="Алексей">
+                        <span class="online-dot"></span>
                     </div>
-                    <div class="chat-preview">
-                        <i class="fas fa-phone call-icon"></i>
-                        <span class="last-message">Аудиозвонок • 5:24</span>
+                    <div class="chat-info">
+                        <div class="chat-header">
+                            <h3 class="chat-name">Алексей Иванов</h3>
+                            <span class="chat-time">14:30</span>
+                        </div>
+                        <div class="chat-preview">
+                            <div class="preview-content">
+                                <i class="fas fa-phone call-icon"></i>
+                                <span class="last-message">Аудиозвонок • 5:24</span>
+                            </div>
+                            <div class="chat-meta">
+                                <span class="unread-count">2</span>
+                                <i class="fas fa-check-double read-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="action-btn call" onclick="startCall('audio', 1)">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button class="action-btn video" onclick="startCall('video', 1)">
+                            <i class="fas fa-video"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="chat-actions">
-                    <button class="call-btn audio" onclick="startCall('audio', this)">
-                        <i class="fas fa-phone"></i>
-                    </button>
-                    <button class="call-btn video" onclick="startCall('video', this)">
-                        <i class="fas fa-video"></i>
-                    </button>
-                </div>
-            </div>
 
-            <div class="chat-item" onclick="startCall('video', this)">
-                <div class="chat-avatar">
-                    <img src="https://i.pravatar.cc/150?img=5" alt="Maria">
-                    <span class="offline-dot"></span>
-                </div>
-                <div class="chat-info">
-                    <div class="chat-header">
-                        <h3 class="chat-name">Maria Garcia</h3>
-                        <span class="chat-time">Вчера</span>
+                <!-- Чат 2 -->
+                <div class="chat-item" onclick="openChat(2)">
+                    <div class="chat-avatar">
+                        <img src="https://i.pravatar.cc/150?img=5" alt="Мария">
+                        <span class="offline-dot"></span>
                     </div>
-                    <div class="chat-preview missed">
-                        <i class="fas fa-video call-icon"></i>
-                        <span class="last-message">Пропущенный видеозвонок</span>
+                    <div class="chat-info">
+                        <div class="chat-header">
+                            <h3 class="chat-name">Мария Гарсия</h3>
+                            <span class="chat-time">Вчера</span>
+                        </div>
+                        <div class="chat-preview">
+                            <div class="preview-content">
+                                <i class="fas fa-video call-icon missed"></i>
+                                <span class="last-message missed">Пропущенный видеозвонок</span>
+                            </div>
+                            <div class="chat-meta">
+                                <span class="unread-count">1</span>
+                                <i class="fas fa-check single-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="action-btn call" onclick="startCall('audio', 2)">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button class="action-btn video" onclick="startCall('video', 2)">
+                            <i class="fas fa-video"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="chat-actions">
-                    <button class="call-btn audio" onclick="startCall('audio', this)">
-                        <i class="fas fa-phone"></i>
-                    </button>
-                    <button class="call-btn video" onclick="startCall('video', this)">
-                        <i class="fas fa-video"></i>
-                    </button>
-                </div>
-            </div>
 
-            <div class="chat-item">
-                <div class="chat-avatar">
-                    <img src="https://i.pravatar.cc/150?img=8" alt="John">
-                    <span class="online-dot"></span>
-                </div>
-                <div class="chat-info">
-                    <div class="chat-header">
-                        <h3 class="chat-name">John Smith</h3>
-                        <span class="chat-time">10:20</span>
+                <!-- Чат 3 (группа) -->
+                <div class="chat-item group-chat" onclick="openGroupChat(1)">
+                    <div class="chat-avatar group">
+                        <div class="group-avatar">
+                            <i class="fas fa-users"></i>
+                        </div>
                     </div>
-                    <div class="chat-preview">
-                        <span class="last-message">Видеозвонок в 15:00</span>
+                    <div class="chat-info">
+                        <div class="chat-header">
+                            <h3 class="chat-name">Рабочая группа</h3>
+                            <span class="chat-time">10:20</span>
+                        </div>
+                        <div class="chat-preview">
+                            <div class="preview-content">
+                                <span class="last-message">Вы: Видеозвонок в 15:00</span>
+                            </div>
+                            <div class="chat-meta">
+                                <span class="members-count">8</span>
+                                <i class="fas fa-check-double read-icon"></i>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="chat-actions">
-                    <button class="call-btn audio">
-                        <i class="fas fa-phone"></i>
-                    </button>
-                    <button class="call-btn video">
-                        <i class="fas fa-video"></i>
-                    </button>
+                    <div class="chat-actions">
+                        <button class="action-btn group" onclick="createGroupCall([1,2,3])">
+                            <i class="fas fa-users"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Кнопка нового звонка -->
-        <button class="new-call-btn" onclick="startNewCall()">
-            <i class="fas fa-phone-plus"></i>
+        <!-- Кнопка нового чата -->
+        <button class="fab" onclick="startNewChat()">
+            <i class="fas fa-edit"></i>
         </button>
+
+        <!-- Нижняя навигация -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" onclick="showMainScreen()">
+                <i class="fas fa-comments"></i>
+                <span>Чаты</span>
+            </button>
+            <button class="nav-btn" onclick="showContactsScreen()">
+                <i class="fas fa-address-book"></i>
+                <span>Контакты</span>
+            </button>
+            <button class="nav-btn call-btn" onclick="startNewCall('audio')">
+                <i class="fas fa-phone"></i>
+            </button>
+            <button class="nav-btn" onclick="showCallHistory()">
+                <i class="fas fa-history"></i>
+                <span>История</span>
+            </button>
+            <button class="nav-btn" onclick="showSettingsScreen()">
+                <i class="fas fa-cog"></i>
+                <span>Настройки</span>
+            </button>
+        </nav>
     </div>
 
-    <!-- Экран звонка -->
-    <div id="callScreen" class="screen">
-        <!-- Фон с облаками -->
-        <div class="clouds-bg">
-            <div class="cloud cloud-1"><i class="fas fa-cloud"></i></div>
-            <div class="cloud cloud-2"><i class="fas fa-cloud"></i></div>
-        </div>
-
-        <!-- Анимированный замок -->
-        <div class="lock-indicator">
-            <i class="fas fa-lock"></i>
-            <span>Зашифровано</span>
-        </div>
-
-        <!-- Контактная информация -->
-        <div class="call-contact-info">
-            <div class="avatar-wrapper">
-                <div class="pulsing-border">
-                    <div class="pulse-ring"></div>
-                    <div class="pulse-ring delay"></div>
+    <!-- Экран чата -->
+    <div id="chatScreen" class="screen">
+        <!-- Хедер чата -->
+        <header class="chat-header">
+            <button class="back-btn" onclick="closeChat()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            
+            <div class="chat-contact" onclick="showContactInfo()">
+                <div class="contact-avatar">
+                    <img id="chatContactAvatar" src="https://i.pravatar.cc/150?img=1" alt="Контакт">
+                    <span class="status-dot online"></span>
                 </div>
-                <img id="callAvatar" src="https://i.pravatar.cc/150?img=1" alt="Avatar" class="call-avatar">
+                <div class="contact-info">
+                    <h2 id="chatContactName">Алексей Иванов</h2>
+                    <p id="chatContactStatus">был(а) недавно</p>
+                </div>
             </div>
-            <h2 id="callName" class="call-name">Alex Johnson</h2>
-            <p id="callStatus" class="call-status">Соединение...</p>
-        </div>
-
-        <!-- Анимация ракеты -->
-        <div id="rocketAnimation" class="rocket-animation">
-            <div class="rocket">
-                <i class="fas fa-rocket"></i>
-            </div>
-            <div class="cloud-explosion">
-                <i class="fas fa-cloud"></i>
-            </div>
-        </div>
-
-        <!-- Управление звонком -->
-        <div class="call-controls">
-            <button class="control-btn" onclick="toggleMute()">
-                <i class="fas fa-microphone"></i>
-                <span class="btn-label">Микрофон</span>
-            </button>
             
-            <button class="control-btn" onclick="toggleVideo()">
-                <i class="fas fa-video"></i>
-                <span class="btn-label">Камера</span>
-            </button>
-            
-            <button class="control-btn" onclick="toggleSpeaker()">
-                <i class="fas fa-volume-up"></i>
-                <span class="btn-label">Динамик</span>
-            </button>
-            
-            <button class="control-btn end-call" onclick="endCall()">
-                <i class="fas fa-phone-slash"></i>
-                <span class="btn-label">Завершить</span>
-            </button>
-        </div>
-
-        <!-- Окно с видео (для видеозвонков) -->
-        <div id="videoPreview" class="video-preview hidden">
-            <div class="video-header">
-                <span>Вы</span>
-                <button class="close-video" onclick="toggleVideo()">
-                    <i class="fas fa-times"></i>
+            <div class="chat-actions-header">
+                <button class="icon-btn" onclick="startCall('audio', currentChatId)">
+                    <i class="fas fa-phone"></i>
+                </button>
+                <button class="icon-btn" onclick="startCall('video', currentChatId)">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button class="icon-btn" onclick="showChatMenu()">
+                    <i class="fas fa-ellipsis-v"></i>
                 </button>
             </div>
-            <div class="video-placeholder">
-                <i class="fas fa-user"></i>
+        </header>
+
+        <!-- Сообщения чата -->
+        <div class="messages-container" id="messagesContainer">
+            <!-- Дата разделитель -->
+            <div class="date-divider">
+                <span>Сегодня</span>
+            </div>
+
+            <!-- Входящее сообщение -->
+            <div class="message incoming">
+                <div class="message-content">
+                    <div class="message-text">
+                        Привет! Как дела?
+                    </div>
+                    <div class="message-time">
+                        14:25
+                        <i class="fas fa-check-double read"></i>
+                    </div>
+                </div>
+                <div class="message-status">
+                    <i class="fas fa-check-double"></i>
+                </div>
+            </div>
+
+            <!-- Исходящее сообщение -->
+            <div class="message outgoing">
+                <div class="message-content">
+                    <div class="message-text">
+                        Привет! Всё отлично, только что закончил проект. А у тебя?
+                    </div>
+                    <div class="message-time">
+                        14:26
+                        <i class="fas fa-check-double read"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Входящее голосовое сообщение -->
+            <div class="message incoming voice-message">
+                <div class="message-content">
+                    <div class="voice-content">
+                        <button class="play-voice">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="voice-waveform">
+                            <div class="wave"></div>
+                        </div>
+                        <span class="voice-duration">0:15</span>
+                    </div>
+                    <div class="message-time">
+                        14:27
+                    </div>
+                </div>
+            </div>
+
+            <!-- Исходящее сообщение о звонке -->
+            <div class="message outgoing call-message">
+                <div class="message-content">
+                    <div class="call-info">
+                        <i class="fas fa-phone"></i>
+                        <div class="call-details">
+                            <span class="call-type">Аудиозвонок</span>
+                            <span class="call-duration">5:24</span>
+                        </div>
+                    </div>
+                    <div class="message-time">
+                        14:30
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Подсказка свайпа -->
-        <div class="swipe-hint">
-            <i class="fas fa-arrows-alt-h"></i>
-            <span>Свайп для переключения аудио/видео</span>
+        <!-- Панель ввода сообщения -->
+        <div class="message-input-container">
+            <button class="input-btn" onclick="toggleAttachmentMenu()">
+                <i class="fas fa-plus"></i>
+            </button>
+            
+            <div class="input-wrapper">
+                <input type="text" 
+                       class="message-input" 
+                       placeholder="Сообщение..." 
+                       onkeypress="handleMessageInput(event)">
+                <button class="voice-btn" onclick="startVoiceMessage()">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+            
+            <button class="send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+
+        <!-- Меню вложений -->
+        <div class="attachment-menu" id="attachmentMenu">
+            <div class="attachment-options">
+                <button class="attach-option" onclick="attachPhoto()">
+                    <div class="option-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <span>Фото</span>
+                </button>
+                <button class="attach-option" onclick="attachVideo()">
+                    <div class="option-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <span>Видео</span>
+                </button>
+                <button class="attach-option" onclick="attachDocument()">
+                    <div class="option-icon">
+                        <i class="fas fa-file"></i>
+                    </div>
+                    <span>Документ</span>
+                </button>
+                <button class="attach-option" onclick="attachLocation()">
+                    <div class="option-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <span>Местоположение</span>
+                </button>
+                <button class="attach-option" onclick="attachContact()">
+                    <div class="option-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span>Контакт</span>
+                </button>
+                <button class="attach-option" onclick="attachSticker()">
+                    <div class="option-icon">
+                        <i class="fas fa-sticky-note"></i>
+                    </div>
+                    <span>Стикер</span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Экран истории звонков -->
-    <div id="historyScreen" class="screen">
-        <div class="screen-header">
+    <!-- Экран контактов -->
+    <div id="contactsScreen" class="screen">
+        <header class="header">
             <button class="back-btn" onclick="showMainScreen()">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <h2>История звонков</h2>
+            <h1>Контакты</h1>
+            <button class="icon-btn" onclick="importContacts()">
+                <i class="fas fa-user-plus"></i>
+            </button>
+        </header>
+
+        <div class="contacts-container">
+            <div class="contacts-list" id="contactsList">
+                <!-- Контакты будут загружаться динамически -->
+            </div>
         </div>
 
-        <div class="call-history">
-            <div class="call-item incoming">
-                <div class="call-icon">
-                    <i class="fas fa-phone"></i>
-                </div>
+        <button class="fab" onclick="addNewContact()">
+            <i class="fas fa-user-plus"></i>
+        </button>
+    </div>
+
+    <!-- Экран группового звонка -->
+    <div id="groupCallScreen" class="screen">
+        <div class="group-call-container">
+            <!-- Фон с частицами -->
+            <div class="particles-bg" id="particlesBg"></div>
+
+            <!-- Хедер группового звонка -->
+            <div class="group-call-header">
+                <button class="back-btn" onclick="endGroupCall()">
+                    <i class="fas fa-times"></i>
+                </button>
+                
                 <div class="call-info">
-                    <h3>Alex Johnson</h3>
-                    <p>Входящий аудиозвонок • 5:24</p>
+                    <h2>Групповой видеозвонок</h2>
+                    <p id="groupCallDuration">00:00</p>
+                    <div class="participants-count">
+                        <i class="fas fa-users"></i>
+                        <span id="participantsCount">3</span>
+                    </div>
                 </div>
-                <div class="call-time">
-                    <span>14:30</span>
-                    <button class="re-call" onclick="startCall('audio')">
-                        <i class="fas fa-phone"></i>
-                    </button>
+                
+                <button class="icon-btn" onclick="toggleGroupCallMenu()">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+
+            <!-- Сетка участников -->
+            <div class="participants-grid" id="participantsGrid">
+                <!-- Участник 1 -->
+                <div class="participant active-speaker">
+                    <div class="participant-video">
+                        <img src="https://i.pravatar.cc/300?img=1" alt="Участник">
+                        <div class="participant-overlay">
+                            <span class="participant-name">Алексей</span>
+                            <div class="participant-status">
+                                <i class="fas fa-microphone"></i>
+                                <i class="fas fa-video"></i>
+                            </div>
+                        </div>
+                        <div class="speaker-indicator">
+                            <div class="sound-wave"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Участник 2 -->
+                <div class="participant">
+                    <div class="participant-video">
+                        <img src="https://i.pravatar.cc/300?img=5" alt="Участник">
+                        <div class="participant-overlay">
+                            <span class="participant-name">Мария</span>
+                            <div class="participant-status">
+                                <i class="fas fa-microphone-slash muted"></i>
+                                <i class="fas fa-video"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Участник 3 -->
+                <div class="participant">
+                    <div class="participant-video">
+                        <img src="https://i.pravatar.cc/300?img=8" alt="Участник">
+                        <div class="participant-overlay">
+                            <span class="participant-name">Иван</span>
+                            <div class="participant-status">
+                                <i class="fas fa-microphone"></i>
+                                <i class="fas fa-video-slash"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопка добавления участника -->
+                <div class="participant add-participant" onclick="addParticipantToCall()">
+                    <div class="add-participant-btn">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Добавить</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="call-item missed">
-                <div class="call-icon">
+            <!-- Панель управления групповым звонком -->
+            <div class="group-call-controls">
+                <button class="control-btn" onclick="toggleScreenShare()">
+                    <i class="fas fa-desktop"></i>
+                    <span>Экран</span>
+                </button>
+                
+                <button class="control-btn" onclick="toggleGroupMute()">
+                    <i class="fas fa-microphone"></i>
+                    <span>Микрофон</span>
+                </button>
+                
+                <button class="control-btn" onclick="toggleGroupVideo()">
                     <i class="fas fa-video"></i>
-                </div>
-                <div class="call-info">
-                    <h3>Maria Garcia</h3>
-                    <p>Пропущенный видеозвонок</p>
-                </div>
-                <div class="call-time">
-                    <span>Вчера</span>
-                    <button class="re-call" onclick="startCall('video')">
-                        <i class="fas fa-video"></i>
-                    </button>
-                </div>
+                    <span>Камера</span>
+                </button>
+                
+                <button class="control-btn" onclick="showParticipantsList()">
+                    <i class="fas fa-users"></i>
+                    <span>Участники</span>
+                </button>
+                
+                <button class="control-btn danger" onclick="endGroupCall()">
+                    <i class="fas fa-phone-slash"></i>
+                    <span>Завершить</span>
+                </button>
             </div>
+
+            <!-- Меню группового звонка -->
+            <div class="group-call-menu" id="groupCallMenu">
+                <button class="menu-item" onclick="recordGroupCall()">
+                    <i class="fas fa-record-vinyl"></i>
+                    <span>Записать звонок</span>
+                </button>
+                <button class="menu-item" onclick="toggleEffects()">
+                    <i class="fas fa-magic"></i>
+                    <span>Эффекты</span>
+                </button>
+                <button class="menu-item" onclick="toggleDrawingMode()">
+                    <i class="fas fa-paint-brush"></i>
+                    <span>Рисование</span>
+                </button>
+                <button class="menu-item" onclick="toggleSubitles()">
+                    <i class="fas fa-closed-captioning"></i>
+                    <span>Субтитры</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран звонка (обновлённый) -->
+    <div id="callScreen" class="screen">
+        <!-- Фон с эффектами -->
+        <div class="call-effects">
+            <div class="floating-particles"></div>
+            <div class="pulse-waves"></div>
+        </div>
+
+        <!-- Информация о звонке -->
+        <div class="call-info-panel">
+            <div class="encryption-badge">
+                <i class="fas fa-lock"></i>
+                <span>End-to-End шифрование</span>
+            </div>
+            <div class="call-quality">
+                <i class="fas fa-wifi"></i>
+                <span>Отличное качество</span>
+            </div>
+        </div>
+
+        <!-- Видео собеседника -->
+        <div class="remote-video-container" id="remoteVideo">
+            <img src="https://i.pravatar.cc/500?img=1" alt="Собеседник" class="remote-video">
+            <div class="video-overlay">
+                <h2 id="callContactName">Алексей Иванов</h2>
+                <p id="callStatusText">Соединение...</p>
+            </div>
+        </div>
+
+        <!-- Локальное видео (картинка в картинке) -->
+        <div class="local-video-pip" id="localVideo">
+            <div class="pip-header">
+                <span>Вы</span>
+                <button class="pip-close" onclick="toggleVideo()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="pip-video">
+                <!-- Видео будет добавлено через WebRTC -->
+            </div>
+        </div>
+
+        <!-- Дополнительные функции -->
+        <div class="call-extras">
+            <button class="extra-btn" onclick="toggleEffects()">
+                <i class="fas fa-magic"></i>
+            </button>
+            <button class="extra-btn" onclick="toggleDrawing()">
+                <i class="fas fa-paint-brush"></i>
+            </button>
+            <button class="extra-btn" onclick="toggleRecording()">
+                <i class="fas fa-record-vinyl"></i>
+            </button>
+            <button class="extra-btn" onclick="shareScreen()">
+                <i class="fas fa-desktop"></i>
+            </button>
+        </div>
+
+        <!-- Основные контролы -->
+        <div class="call-controls">
+            <button class="control-btn large" onclick="toggleMute()">
+                <i class="fas fa-microphone"></i>
+                <span>Микрофон</span>
+            </button>
+            
+            <button class="control-btn large" onclick="toggleVideo()">
+                <i class="fas fa-video"></i>
+                <span>Камера</span>
+            </button>
+            
+            <button class="control-btn large" onclick="toggleSpeaker()">
+                <i class="fas fa-volume-up"></i>
+                <span>Динамик</span>
+            </button>
+            
+            <button class="control-btn large danger" onclick="endCall()">
+                <i class="fas fa-phone-slash"></i>
+                <span>Завершить</span>
+            </button>
+        </div>
+
+        <!-- Дополнительное меню -->
+        <div class="call-menu" id="callMenu">
+            <button class="menu-item" onclick="toggleNoiseCancellation()">
+                <i class="fas fa-wave-square"></i>
+                <span>Шумоподавление</span>
+                <span class="menu-status">Вкл</span>
+            </button>
+            <button class="menu-item" onclick="toggleVoiceEffects()">
+                <i class="fas fa-microphone-alt"></i>
+                <span>Эффекты голоса</span>
+            </button>
+            <button class="menu-item" onclick="toggleVideoFilters()">
+                <i class="fas fa-filter"></i>
+                <span>Фильтры видео</span>
+            </button>
+            <button class="menu-item" onclick="sendFileDuringCall()">
+                <i class="fas fa-paperclip"></i>
+                <span>Отправить файл</span>
+            </button>
         </div>
     </div>
 
     <!-- Экран настроек -->
     <div id="settingsScreen" class="screen">
-        <div class="screen-header">
+        <header class="header">
             <button class="back-btn" onclick="showMainScreen()">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <h2>Настройки</h2>
-        </div>
+            <h1>Настройки</h1>
+        </header>
 
-        <div class="settings-list">
-            <div class="setting-item">
-                <i class="fas fa-moon"></i>
-                <div class="setting-info">
-                    <h3>Темная тема</h3>
-                    <p>Включить темный режим</p>
+        <div class="settings-container">
+            <!-- Профиль -->
+            <div class="settings-section">
+                <div class="profile-settings">
+                    <img src="https://i.pravatar.cc/150?img=3" alt="Аватар" class="profile-avatar-large">
+                    <div class="profile-info">
+                        <h2>Алексей</h2>
+                        <p>+7 (999) 123-45-67</p>
+                    </div>
+                    <button class="edit-btn" onclick="editProfile()">
+                        <i class="fas fa-edit"></i>
+                    </button>
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="themeToggle" checked onchange="toggleTheme()">
-                    <span class="slider"></span>
-                </label>
             </div>
 
-            <div class="setting-item">
-                <i class="fas fa-shield-alt"></i>
-                <div class="setting-info">
-                    <h3>Приватность</h3>
-                    <p>Кто может звонить</p>
+            <!-- Основные настройки -->
+            <div class="settings-section">
+                <h3 class="section-title">Основные</h3>
+                
+                <div class="setting-item">
+                    <i class="fas fa-moon"></i>
+                    <div class="setting-info">
+                        <h4>Тёмная тема</h4>
+                        <p>Использовать тёмный интерфейс</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" checked>
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                <select class="privacy-select">
-                    <option>Все</option>
-                    <option selected>Контакты</option>
-                    <option>Никто</option>
-                </select>
+
+                <div class="setting-item">
+                    <i class="fas fa-bell"></i>
+                    <div class="setting-info">
+                        <h4>Уведомления</h4>
+                        <p>Звуки и вибрация</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <i class="fas fa-language"></i>
+                    <div class="setting-info">
+                        <h4>Язык</h4>
+                        <p>Русский</p>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
             </div>
 
-            <div class="setting-item">
-                <i class="fas fa-video"></i>
-                <div class="setting-info">
-                    <h3>Качество видео</h3>
-                    <p>Авто / HD / Экономия</p>
+            <!-- Настройки звонков -->
+            <div class="settings-section">
+                <h3 class="section-title">Звонки</h3>
+                
+                <div class="setting-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="setting-info">
+                        <h4>Приватность</h4>
+                        <p>Кто может звонить</p>
+                    </div>
+                    <select class="setting-select">
+                        <option>Все</option>
+                        <option selected>Контакты</option>
+                        <option>Никто</option>
+                    </select>
                 </div>
-                <select class="quality-select">
-                    <option>Авто</option>
-                    <option>HD</option>
-                    <option selected>Экономия трафика</option>
-                </select>
-            </div>
 
-            <div class="setting-item">
-                <i class="fas fa-microphone"></i>
-                <div class="setting-info">
-                    <h3>Шумоподавление</h3>
-                    <p>Улучшение качества звука</p>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-
-        <div class="settings-footer">
-            <p class="version">Telegram Calls v1.0.0</p>
-            <p class="encryption-info">
-                <i class="fas fa-lock"></i>
-                Все звонки защищены end-to-end шифрованием
-            </p>
-        </div>
-    </div>
-
-    <!-- Модалка нового звонка -->
-    <div id="newCallModal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Новый звонок</h3>
-            <input type="text" placeholder="Имя или номер" class="contact-input">
-            <div class="modal-buttons">
-                <button class="modal-btn audio" onclick="startNewCall('audio')">
-                    <i class="fas fa-phone"></i>
-                    <span>Аудио</span>
-                </button>
-                <button class="modal-btn video" onclick="startNewCall('video')">
+                <div class="setting-item">
                     <i class="fas fa-video"></i>
-                    <span>Видео</span>
+                    <div class="setting-info">
+                        <h4>Качество видео</h4>
+                        <p>Автоматическое</p>
+                    </div>
+                    <select class="setting-select">
+                        <option selected>Авто</option>
+                        <option>HD</option>
+                        <option>Экономия</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <i class="fas fa-wave-square"></i>
+                    <div class="setting-info">
+                        <h4>Шумоподавление</h4>
+                        <p>Улучшение качества звука</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Расширенные настройки -->
+            <div class="settings-section">
+                <h3 class="section-title">Расширенные</h3>
+                
+                <div class="setting-item">
+                    <i class="fas fa-save"></i>
+                    <div class="setting-info">
+                        <h4>Сохранение в галерею</h4>
+                        <p>Автоматически сохранять фото/видео</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <i class="fas fa-sync-alt"></i>
+                    <div class="setting-info">
+                        <h4>Синхронизация</h4>
+                        <p>Синхронизировать с облаком</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <i class="fas fa-key"></i>
+                    <div class="setting-info">
+                        <h4>Блокировка приложения</h4>
+                        <p>PIN-код или отпечаток</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- О приложении -->
+            <div class="settings-section">
+                <h3 class="section-title">О приложении</h3>
+                
+                <div class="about-item">
+                    <span>Версия</span>
+                    <span class="about-value">1.0.0 Pro</span>
+                </div>
+                
+                <div class="about-item">
+                    <span>Лицензия</span>
+                    <span class="about-value">Telegram API</span>
+                </div>
+                
+                <div class="about-item">
+                    <span>Разработчик</span>
+                    <span class="about-value">Telegram Calls Team</span>
+                </div>
+                
+                <button class="support-btn" onclick="contactSupport()">
+                    <i class="fas fa-headset"></i>
+                    <span>Служба поддержки</span>
                 </button>
             </div>
-            <button class="modal-close" onclick="closeNewCallModal()">
-                <i class="fas fa-times"></i>
-            </button>
         </div>
     </div>
 
+    <!-- Модальные окна -->
+    
+    <!-- Модалка нового звонка -->
+    <div id="newCallModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Новый звонок</h3>
+                <button class="close-modal" onclick="closeNewCallModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <input type="text" 
+                       class="contact-search" 
+                       placeholder="Имя, фамилия или номер"
+                       id="callContactSearch">
+                
+                <div class="quick-contacts">
+                    <h4>Частые контакты</h4>
+                    <div class="contacts-grid" id="quickContacts"></div>
+                </div>
+                
+                <div class="call-type-selector">
+                    <button class="call-type-btn active" data-type="audio">
+                        <i class="fas fa-phone"></i>
+                        <span>Аудио</span>
+                    </button>
+                    <button class="call-type-btn" data-type="video">
+                        <i class="fas fa-video"></i>
+                        <span>Видео</span>
+                    </button>
+                    <button class="call-type-btn" data-type="group">
+                        <i class="fas fa-users"></i>
+                        <span>Группа</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeNewCallModal()">
+                    Отмена
+                </button>
+                <button class="btn primary" onclick="startCallFromModal()">
+                    Начать звонок
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка создания группы -->
+    <div id="createGroupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Создать группу</h3>
+                <button class="close-modal" onclick="closeCreateGroupModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="group-avatar-upload">
+                    <div class="avatar-preview">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <button class="upload-btn" onclick="uploadGroupAvatar()">
+                        <i class="fas fa-camera"></i>
+                        Добавить фото
+                    </button>
+                </div>
+                
+                <input type="text" 
+                       class="group-name-input" 
+                       placeholder="Название группы"
+                       id="groupNameInput">
+                
+                <div class="group-members-selector">
+                    <h4>Выберите участников</h4>
+                    <div class="members-list" id="groupMembersList"></div>
+                </div>
+                
+                <div class="group-type-selector">
+                    <label class="radio-label">
+                        <input type="radio" name="groupType" value="chat" checked>
+                        <span>Чат группа</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="groupType" value="call">
+                        <span>Группа для звонков</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="groupType" value="channel">
+                        <span>Канал</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeCreateGroupModal()">
+                    Отмена
+                </button>
+                <button class="btn primary" onclick="createGroup()">
+                    Создать группу
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка эффектов для видео -->
+    <div id="effectsModal" class="modal effects-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Эффекты для видео</h3>
+                <button class="close-modal" onclick="closeEffectsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="effects-categories">
+                    <button class="category-btn active">Фильтры</button>
+                    <button class="category-btn">Маски</button>
+                    <button class="category-btn">Эффекты</button>
+                    <button class="category-btn">Фоны</button>
+                </div>
+                
+                <div class="effects-grid">
+                    <div class="effect-item" data-effect="normal">
+                        <div class="effect-preview normal"></div>
+                        <span>Обычный</span>
+                    </div>
+                    <div class="effect-item" data-effect="vintage">
+                        <div class="effect-preview vintage"></div>
+                        <span>Винтаж</span>
+                    </div>
+                    <div class="effect-item" data-effect="blackwhite">
+                        <div class="effect-preview blackwhite"></div>
+                        <span>Ч/Б</span>
+                    </div>
+                    <div class="effect-item" data-effect="sepia">
+                        <div class="effect-preview sepia"></div>
+                        <span>Сепия</span>
+                    </div>
+                    <div class="effect-item" data-effect="blur">
+                        <div class="effect-preview blur"></div>
+                        <span>Размытие</span>
+                    </div>
+                    <div class="effect-item" data-effect="pixelate">
+                        <div class="effect-preview pixelate"></div>
+                        <span>Пиксели</span>
+                    </div>
+                </div>
+                
+                <div class="effect-controls">
+                    <div class="control-item">
+                        <label>Яркость</label>
+                        <input type="range" min="0" max="100" value="50" class="effect-slider">
+                    </div>
+                    <div class="control-item">
+                        <label>Контраст</label>
+                        <input type="range" min="0" max="100" value="50" class="effect-slider">
+                    </div>
+                    <div class="control-item">
+                        <label>Насыщенность</label>
+                        <input type="range" min="0" max="100" value="50" class="effect-slider">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Канвас для рисования -->
+    <canvas id="drawingCanvas" class="drawing-canvas"></canvas>
+
+    <!-- Аудио элементы -->
+    <audio id="ringtoneAudio" loop>
+        <source src="assets/sounds/ringtone.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="messageSound">
+        <source src="assets/sounds/message.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="callEndSound">
+        <source src="assets/sounds/call_end.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Скрипты -->
     <script src="script.js"></script>
+    <script src="modules/chat.js"></script>
+    <script src="modules/calls.js"></script>
+    <script src="modules/webrtc.js"></script>
+    <script src="modules/contacts.js"></script>
+    <script src="modules/groups.js"></script>
+    <script src="modules/drawing.js"></script>
+    <script src="modules/storage.js"></script>
+    <script src="modules/effects.js"></script>
+    
+    <script>
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                initApp();
+            }, 1500);
+        });
+    </script>
 </body>
 </html>
