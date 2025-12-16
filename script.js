@@ -1306,3 +1306,497 @@ window.importContacts = importContacts;
 window.playVoiceMessage = playVoiceMessage;
 
 console.log('📱 Telegram Calls Pro готов к работе!');
+
+// ===== ИСПРАВЛЕНИЯ ДЛЯ КОНТАКТОВ =====
+function showContactsScreen() {
+    showScreen('contactsScreen');
+    renderContactsList();
+}
+
+function renderContactsList() {
+    const container = document.getElementById('contactsList');
+    if (!container) return;
+    
+    // Проверяем, есть ли контакты в модуле
+    const contacts = ContactsModule?.state?.contacts || [
+        {
+            id: 1,
+            name: 'Алексей Иванов',
+            phone: '+7 (999) 111-22-33',
+            avatar: 'https://i.pravatar.cc/150?img=1',
+            status: 'online',
+            isFavorite: true
+        },
+        {
+            id: 2,
+            name: 'Мария Гарсия',
+            phone: '+7 (999) 222-33-44',
+            avatar: 'https://i.pravatar.cc/150?img=5',
+            status: 'offline',
+            isFavorite: true
+        },
+        {
+            id: 3,
+            name: 'Иван Петров',
+            phone: '+7 (999) 333-44-55',
+            avatar: 'https://i.pravatar.cc/150?img=8',
+            status: 'online',
+            isFavorite: false
+        }
+    ];
+    
+    container.innerHTML = contacts.map(contact => `
+        <div class="contact-item" onclick="selectContact(${contact.id})">
+            <div class="contact-avatar">
+                <img src="${contact.avatar}" alt="${contact.name}">
+                <span class="status-dot ${contact.status}"></span>
+            </div>
+            <div class="contact-info">
+                <div class="contact-header">
+                    <h3 class="contact-name">${contact.name}</h3>
+                    ${contact.isFavorite ? '<i class="fas fa-star favorite-star"></i>' : ''}
+                </div>
+                <p class="contact-phone">${contact.phone}</p>
+            </div>
+            <div class="contact-actions">
+                <button class="action-btn call" onclick="startCall('audio', ${contact.id}); event.stopPropagation()">
+                    <i class="fas fa-phone"></i>
+                </button>
+                <button class="action-btn video" onclick="startCall('video', ${contact.id}); event.stopPropagation()">
+                    <i class="fas fa-video"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectContact(contactId) {
+    // В реальном приложении здесь бы открытие чата
+    showNotification('Функция откроется в следующем обновлении', 'info');
+}
+
+// ===== ИСПРАВЛЕНИЯ ДЛЯ ИСТОРИИ ЗВОНКОВ =====
+function showCallHistory() {
+    // Создаём временный экран истории
+    const historyHTML = `
+        <div id="historyScreen" class="screen active">
+            <header class="header">
+                <button class="back-btn" onclick="showMainScreen()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>История звонков</h1>
+                <button class="icon-btn" onclick="clearCallHistory()" title="Очистить историю">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </header>
+            
+            <div class="call-history-container">
+                ${renderCallHistoryItems()}
+            </div>
+        </div>
+    `;
+    
+    // Добавляем на страницу
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = historyHTML;
+    document.body.appendChild(tempDiv.firstElementChild);
+    
+    // Показываем экран
+    showScreen('historyScreen');
+}
+
+function renderCallHistoryItems() {
+    const calls = [
+        {
+            id: 1,
+            name: 'Алексей Иванов',
+            avatar: 'https://i.pravatar.cc/150?img=1',
+            type: 'audio',
+            duration: '5:24',
+            time: 'Сегодня, 14:30',
+            status: 'incoming',
+            missed: false
+        },
+        {
+            id: 2,
+            name: 'Мария Гарсия',
+            avatar: 'https://i.pravatar.cc/150?img=5',
+            type: 'video',
+            duration: 'Пропущен',
+            time: 'Вчера, 18:15',
+            status: 'incoming',
+            missed: true
+        },
+        {
+            id: 3,
+            name: 'Иван Петров',
+            avatar: 'https://i.pravatar.cc/150?img=8',
+            type: 'audio',
+            duration: '12:45',
+            time: '12 ноя',
+            status: 'outgoing',
+            missed: false
+        }
+    ];
+    
+    return calls.map(call => `
+        <div class="call-history-item ${call.missed ? 'missed' : ''}">
+            <div class="call-avatar">
+                <img src="${call.avatar}" alt="${call.name}">
+                <div class="call-type-icon">
+                    <i class="fas fa-${call.type === 'video' ? 'video' : 'phone'}"></i>
+                </div>
+            </div>
+            <div class="call-info">
+                <div class="call-header">
+                    <h3>${call.name}</h3>
+                    <span class="call-time">${call.time}</span>
+                </div>
+                <div class="call-details">
+                    <span class="call-type">${call.type === 'video' ? 'Видеозвонок' : 'Аудиозвонок'}</span>
+                    <span class="call-duration">${call.duration}</span>
+                </div>
+            </div>
+            <div class="call-actions">
+                <button class="call-back-btn" onclick="startCall('${call.type}', ${call.id})">
+                    <i class="fas fa-phone"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function clearCallHistory() {
+    if (confirm('Очистить всю историю звонков?')) {
+        showNotification('История звонков очищена', 'success');
+        // В реальном приложении здесь бы очистка из хранилища
+    }
+}
+
+// ===== ИСПРАВЛЕНИЕ ТЕМЫ =====
+function toggleTheme() {
+    AppState.isDarkTheme = !AppState.isDarkTheme;
+    const theme = AppState.isDarkTheme ? 'dark' : 'light';
+    
+    document.body.setAttribute('data-theme', theme);
+    document.getElementById('themeToggle').checked = AppState.isDarkTheme;
+    
+    localStorage.setItem('theme', theme);
+    showNotification(`Тема изменена на ${AppState.isDarkTheme ? 'тёмную' : 'светлую'}`, 'info');
+}
+
+// Инициализация темы при загрузке
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    AppState.isDarkTheme = savedTheme ? savedTheme === 'dark' : systemPrefersDark;
+    
+    document.body.setAttribute('data-theme', AppState.isDarkTheme ? 'dark' : 'light');
+    
+    // Обновляем переключатель в настройках
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.checked = AppState.isDarkTheme;
+        themeToggle.onchange = toggleTheme;
+    }
+}
+
+// Вызываем initTheme при загрузке
+document.addEventListener('DOMContentLoaded', initTheme);
+
+// ===== ИСПРАВЛЕНИЯ ДЛЯ БОКОВОГО МЕНЮ =====
+document.addEventListener('click', (e) => {
+    // Закрытие бокового меню при клике вне его
+    const sideMenu = document.getElementById('sideMenu');
+    if (sideMenu && sideMenu.classList.contains('open') && 
+        !e.target.closest('.side-menu') && 
+        !e.target.closest('.menu-btn')) {
+        sideMenu.classList.remove('open');
+    }
+});
+
+// ===== БЫСТРЫЕ ИСПРАВЛЕНИЯ ДЛЯ ОТСУТСТВУЮЩИХ ФУНКЦИЙ =====
+window.showPremiumScreen = () => showNotification('Premium скоро будет доступен!', 'info');
+window.showChatMenu = () => showNotification('Меню чата', 'info');
+window.toggleAttachmentMenu = () => showNotification('Вложения', 'info');
+window.startVoiceMessage = () => showNotification('Голосовое сообщение', 'info');
+window.showContactInfo = () => showNotification('Информация о контакте', 'info');
+
+// Функции для вложений (заглушки)
+window.attachPhoto = () => showNotification('Прикрепление фото', 'info');
+window.attachVideo = () => showNotification('Прикрепление видео', 'info');
+window.attachDocument = () => showNotification('Прикрепление документа', 'info');
+window.attachLocation = () => showNotification('Прикрепление местоположения', 'info');
+window.attachContact = () => showNotification('Прикрепление контакта', 'info');
+window.attachSticker = () => showNotification('Прикрепление стикера', 'info');
+
+// Функции для звонков (заглушки)
+window.toggleScreenShare = () => showNotification('Демонстрация экрана', 'info');
+window.toggleGroupMute = () => showNotification('Микрофон группы', 'info');
+window.toggleGroupVideo = () => showNotification('Камера группы', 'info');
+window.showParticipantsList = () => showNotification('Список участников', 'info');
+window.recordGroupCall = () => showNotification('Запись звонка', 'info');
+window.toggleSubitles = () => showNotification('Субтитры', 'info');
+
+// Настройки
+window.editProfile = () => showNotification('Редактирование профиля', 'info');
+window.contactSupport = () => showNotification('Поддержка', 'info');
+
+// Логин/логаут
+window.logout = () => {
+    if (confirm('Выйти из аккаунта?')) {
+        showNotification('Вы вышли из аккаунта', 'info');
+        // В реальном приложении здесь бы редирект на логин
+    }
+};
+
+// ===== ИСПРАВЛЕНИЕ ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ =====
+function showScreen(screenId) {
+    // Скрываем все экраны
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    
+    // Показываем нужный экран
+    const screen = document.getElementById(screenId);
+    if (screen) {
+        screen.classList.add('active');
+    }
+    
+    // Останавливаем все активные звуки
+    stopAllSounds();
+}
+
+// ===== ДОБАВЛЯЕМ ОТСУТСТВУЮЩИЕ CSS КЛАССЫ ЧЕРЕЗ JS =====
+function addMissingStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Стили для контактов */
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .contact-item:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .contact-avatar {
+            position: relative;
+            margin-right: 12px;
+        }
+        
+        .contact-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            object-fit: cover;
+        }
+        
+        .status-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 6px;
+            border: 2px solid var(--bg-secondary);
+        }
+        
+        .status-dot.online {
+            background: #4CAF50;
+        }
+        
+        .status-dot.offline {
+            background: #999;
+        }
+        
+        .favorite-star {
+            color: #FFD700;
+            margin-left: 8px;
+        }
+        
+        .contact-phone {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        /* Стили для истории звонков */
+        .call-history-container {
+            padding: 16px;
+        }
+        
+        .call-history-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .call-history-item.missed {
+            border-left: 4px solid #ff3b30;
+        }
+        
+        .call-type-icon {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: var(--accent-primary);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        
+        .call-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        
+        .call-type {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .call-duration {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .call-back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            border: none;
+            background: rgba(0, 136, 204, 0.1);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        /* Исправления для кнопок */
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn.call {
+            background: rgba(0, 136, 204, 0.1);
+            color: var(--accent-primary);
+        }
+        
+        .action-btn.video {
+            background: rgba(0, 201, 183, 0.1);
+            color: var(--accent-secondary);
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Стили для свайп-подсказки */
+        .swipe-hint {
+            position: absolute;
+            bottom: 120px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Стили для переключателя темы */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-tertiary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--accent-primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    `;
+    
+    document.head.appendChild(style);
+}
+
+// Добавляем недостающие стили при загрузке
+document.addEventListener('DOMContentLoaded', addMissingStyles);
+
+// ===== ФИНАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ =====
+window.addEventListener('DOMContentLoaded', () => {
+    // Инициализируем тему
+    initTheme();
+    
+    // Инициализируем приложение
+    initApp();
+    
+    // Добавляем недостающие стили
+    addMissingStyles();
+    
+    console.log('✅ Приложение инициализировано с исправлениями');
+});
