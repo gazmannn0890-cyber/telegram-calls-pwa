@@ -1,17 +1,20 @@
 {
-  "name": "Telegram Calls",
-  "short_name": "TG Calls",
-  "description": "Минималистичное приложение для аудио- и видеозвонков в стиле Telegram",
+  "name": "Telegram Calls Pro",
+  "short_name": "TG Calls Pro",
+  "description": "Продвинутые аудио- и видеозвонки с чатами и групповыми конференциями",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay"],
   "background_color": "#0a0a0a",
   "theme_color": "#0088cc",
   "orientation": "portrait",
+  "categories": ["social", "communication", "productivity"],
   "icons": [
     {
       "src": "assets/icons/icon-72.png",
       "sizes": "72x72",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "assets/icons/icon-96.png",
@@ -36,7 +39,8 @@
     {
       "src": "assets/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "assets/icons/icon-384.png",
@@ -46,16 +50,105 @@
     {
       "src": "assets/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["social", "communication"],
   "screenshots": [
     {
-      "src": "assets/screenshots/screenshot1.png",
+      "src": "assets/screenshots/main.png",
       "sizes": "1080x1920",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Главный экран с чатами"
+    },
+    {
+      "src": "assets/screenshots/call.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Экран видеозвонка"
+    },
+    {
+      "src": "assets/screenshots/group.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Групповой видеозвонок"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Новый звонок",
+      "short_name": "Звонок",
+      "description": "Начать новый звонок",
+      "url": "/?new-call",
+      "icons": [
+        {
+          "src": "assets/icons/phone-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Новый чат",
+      "short_name": "Чат",
+      "description": "Начать новый чат",
+      "url": "/?new-chat",
+      "icons": [
+        {
+          "src": "assets/icons/chat-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Групповой звонок",
+      "short_name": "Группа",
+      "description": "Создать групповой звонок",
+      "url": "/?group-call",
+      "icons": [
+        {
+          "src": "assets/icons/group-96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 360
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+telegram",
+      "url": "/?call=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/?share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["image/*", "video/*", "audio/*", "application/*"]
+        }
+      ]
+    }
+  },
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "permissions": [
+    "camera",
+    "microphone",
+    "notifications",
+    "clipboard-write"
+  ],
+  "orientation_lock": "portrait"
 }
